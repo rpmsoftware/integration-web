@@ -1,0 +1,13 @@
+{
+    "name": "integration-web",
+    "version": "0.0.1",
+    "private": true,
+    "files": [
+        "webhooks.js"
+    ],
+    "dependencies": {
+        "express": "~4.12.4",
+        "body-parser": "~1.12.4",
+        "node-rest-client": "^1.4.4"
+    }
+}
