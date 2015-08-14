@@ -9,7 +9,7 @@ var enumObjectType = require('integration-common/api-wrappers').OBJECT_TYPE;
 
 
 var headerPatterns = { 
-    'x-rpm-deployment': /^telco|cube$/,
+    'x-rpm-instance': /^telco|cube$/i,
      // 'x-rpm-subscriber': /\w+/, TODO
     'user-agent': /^RPM-Webhook$/,
     'content-type': /^application\/json/};
@@ -46,11 +46,12 @@ exports.start = function (port, path, callback) {
             validateHeaders(req.headers);
             validateWebHooksRequest(req.body);
         } catch(err) {
+            console.error(err);
             res.status(400).send(err);
             return;
         }
         res.send();
-        req.body.Deployment = req.headers['x-rpm-deployment'];
+        req.body.Instance = req.headers['x-rpm-instance'];
         req.body.Subscriber = req.headers['x-rpm-subscriber'];
         if(typeof callback==='function') {
             callback(req.body, req);
