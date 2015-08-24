@@ -9,7 +9,7 @@ var enumObjectType = require('integration-common/api-wrappers').OBJECT_TYPE;
 
 
 var headerPatterns = { 
-    'x-rpm-instance': /^telco|cube$/i,
+    // 'x-rpm-instance': /^telco|cube/i,
      // 'x-rpm-subscriber': /\w+/, TODO
     'user-agent': /^RPM-Webhook$/,
     'content-type': /^application\/json/};
@@ -57,7 +57,9 @@ exports.start = function (port, path, callback) {
             callback(req.body, req);
         }
     });
-    return app.listen(port);
+    var srv = app.listen(port);
+    console.info('WebHooks server is listening on port',port);
+    return srv;
 };
 
 function WebHooksRequestData(processId, formId, eventName) {
@@ -73,7 +75,13 @@ function WebHooksRequestData(processId, formId, eventName) {
 WebHooksRequestData.prototype.RequestId = 0;
 exports.WebHooksRequestData = WebHooksRequestData;
 
-var EVENT_NAMES = ['form.start','form.edit'];
+exports.EVENT_FORM_START = 'form.start';
+exports.EVENT_FORM_EDIT = 'form.edit';
+ 
+var EVENT_NAMES = [
+    exports.EVENT_FORM_START,
+    exports.EVENT_FORM_EDIT
+    ];
 
 function validateWebHooksRequest (obj) {
     if(typeof obj==='object' &&
