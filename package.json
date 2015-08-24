@@ -3,11 +3,12 @@
     "version": "0.0.2",
     "private": true,
     "files": [
-        "webhooks.js"
+        "index.js","webhooks.js"
     ],
     "dependencies": {
         "express": "~4.12.4",
         "body-parser": "~1.12.4",
-        "node-rest-client": "^1.4.4"
+        "node-rest-client": "^1.4.4",
+        "integration-common": "https://github.com/rpmsoftware/integration-common.git#0.0.7"
     }
 }
