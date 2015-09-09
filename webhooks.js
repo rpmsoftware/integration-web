@@ -3,14 +3,14 @@
 
 var util = require('util'); 
 var express = require('express'); 
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var enumObjectType = require('integration-common/api-wrappers').OBJECT_TYPE;
-
+var https = require('http'); // TODO change to https
 
 
 var headerPatterns = { 
     // 'x-rpm-instance': /^telco|cube/i,
-     // 'x-rpm-subscriber': /\w+/, TODO
+    'x-rpm-subscriber': /\d+/,
     'user-agent': /^RPM-Webhook$/,
     'content-type': /^application\/json/};
     
@@ -37,7 +37,10 @@ function normalizePath(path) {
     return path;
 }
 
-exports.start = function (port, path, callback) {
+exports.start = function (port, path, options, callback) {
+    if(typeof options==='function') {
+        callback = options;
+    }
     var app = express();    
     app.use(bodyParser.json());
     app.post(normalizePath(path), function (req, res) {
@@ -57,7 +60,8 @@ exports.start = function (port, path, callback) {
             callback(req.body, req);
         }
     });
-    var srv = app.listen(port);
+    // var srv = app.listen(port);
+    var srv = https.createServer(options, app).listen(port);
     console.info('WebHooks server is listening on port',port);
     return srv;
 };
