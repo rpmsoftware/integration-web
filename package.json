@@ -1,6 +1,6 @@
 {
     "name": "integration-web",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "private": true,
     "files": [
         "index.js",
@@ -15,6 +15,6 @@
         "simple-oauth2": "^0.2.1",
         "jws": "^3.0.0",
         "node-uuid": "^1.4.3",
-        "integration-common": "https://github.com/rpmsoftware/integration-common.git#0.0.7"
+        "integration-common": "https://github.com/rpmsoftware/integration-common.git#0.0.11"
     }
 }
