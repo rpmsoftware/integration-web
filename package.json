@@ -1,9 +1,10 @@
 {
     "name": "integration-web",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "private": true,
     "files": [
         "index.js",
+        "config.json.sample",
         "webhooks.js",
         "office365.js"
     ],
