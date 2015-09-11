@@ -4,9 +4,12 @@
     "private": true,
     "files": [
         "index.js",
-        "config.json.sample",
-        "webhooks.js",
-        "office365.js"
+        "config.office365.sample",
+        "config.webhooks.sample",
+        "demo-office365.js",
+        "demo-webhooks.js",
+        "office365.js",
+        "webhooks.js"
     ],
     "dependencies": {
         "promised-io": "^0.3.5",
