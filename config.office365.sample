@@ -1,0 +1,7 @@
+ {
+        "key": "-----BEGIN RSA PRIVATE KEY----- ... -----END RSA PRIVATE KEY-----\r\n",
+        "tenantID": "GUID",
+        "clientID": "GUID",
+        "certThumbprint": "...",
+        "mailbox": "test@some.com"
+}

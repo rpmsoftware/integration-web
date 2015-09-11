@@ -3,7 +3,7 @@ var webhooks = require('./webhooks');
 
 var rpmUtil = require('integration-common/util');
 
-var config = rpmUtil.readConfig(undefined, 'config.json');
+var config = rpmUtil.readConfig(undefined, 'config.json').webHook;
 
 var cpath = 'https://localhost:' + config.port + '/' + config.path;
 
