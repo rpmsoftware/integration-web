@@ -39,6 +39,12 @@
     }
 
     exports.start = function (port, path, options, callback) {
+        if(arguments.length<3) {
+            callback = path;
+            options = port;
+            port = options.port;
+            path = options.path;
+        }
         var app = express();
         app.use(bodyParser.json());
         app.post(normalizePath(path), function (req, res) {
