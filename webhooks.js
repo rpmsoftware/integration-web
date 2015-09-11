@@ -2,10 +2,8 @@
 (function () {
 
     var util = require('util');
-    var express = require('express');
-    var bodyParser = require('body-parser');
+    var lib = require('./lib');
     var enumObjectType = require('integration-common/api-wrappers').OBJECT_TYPE;
-    var https = require('https');
 
 
     var headerPatterns = { 
@@ -24,30 +22,8 @@
         }
     }
 
-
-    function normalizePath(path) {
-        var slash = '/';
-        if (path) {
-            path = path.trim();
-            if (path[0] !== slash) {
-                path = slash + path;
-            }
-        } else {
-            path = slash;
-        }
-        return path;
-    }
-
     exports.start = function (port, path, options, callback) {
-        if(arguments.length<3) {
-            callback = path;
-            options = port;
-            port = options.port;
-            path = options.path;
-        }
-        var app = express();
-        app.use(bodyParser.json());
-        app.post(normalizePath(path), function (req, res) {
+        return lib.startJsonPostServer(port, path, options, function (req, res) {
             res.contentType = 'plain/text';
             try {
                 validateHeaders(req.headers);
@@ -64,9 +40,6 @@
                 callback(req.body, req);
             }
         });
-        var srv = https.createServer(options, app).listen(port);
-        console.info('WebHooks server is listening on port', port);
-        return srv;
     };
 
     function WebHooksRequestData(processId, formId, eventName) {
