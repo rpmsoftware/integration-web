@@ -24,6 +24,10 @@ function startJsonPostServer(port, path, options, callback) {
         port = options.port;
         path = options.path;
     }
+    if (!path) {
+        path = '/';
+        console.warn('Path is not defined. Using ' + path);
+    }
     var app = express();
     app.use(bodyParser.json());
     app.post(normalizePath(path), callback);

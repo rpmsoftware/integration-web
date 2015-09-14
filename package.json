@@ -8,6 +8,7 @@
         "config.webhooks.sample",
         "demo-office365.js",
         "demo-webhooks.js",
+        "lib.js",
         "office365.js",
         "webhooks.js"
     ],
