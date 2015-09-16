@@ -7,8 +7,8 @@
 
 
     var headerPatterns = { 
-        // 'x-rpm-instance': /^telco|cube/i,
-        'x-rpm-subscriber': /\d+/,
+        'x-rpm-instance': /^\S+$/,
+        'x-rpm-subscriber': /^\d+$/,
         'user-agent': /^RPM-Webhook$/,
         'content-type': /^application\/json/
     };
@@ -77,7 +77,7 @@
 
 
     exports.WebHooksRequestHeader = function WebHooksRequestHeader(rpmDeployment, rpmSubscriber) {
-        this['x-rpm-deployment'] = rpmDeployment;
+        this['x-rpm-instance'] = rpmDeployment;
         this['x-rpm-subscriber'] = rpmSubscriber;
         this['user-agent'] = 'RPM-Webhook';
         this['content-type'] = 'application/json';

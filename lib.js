@@ -1,3 +1,4 @@
+/* global process */
 var express = require('express');
 var bodyParser = require('body-parser');
 var https = require('https');
@@ -17,6 +18,13 @@ function normalizePath(path) {
     return path;
 }
 
+function herokuEnsureHttps(req, res, next) {
+    if (req.headers['x-forwarded-proto'] === 'https') {
+        return next();
+    }
+    res.status(404).send('https please');
+}
+
 function startJsonPostServer(port, path, options, callback) {
     if (arguments.length < 3) {
         callback = path;
@@ -27,9 +35,34 @@ function startJsonPostServer(port, path, options, callback) {
     var app = express();
     app.use(bodyParser.json());
     app.post(normalizePath(path), callback);
-    var srv = https.createServer(options, app).listen(port);
+    var srv;
+    if (isHeroku()) {
+        app.use(herokuEnsureHttps);
+        port = process.env.PORT;
+    } else {
+        app = https.createServer(options, app);
+    }
+    srv = app.listen(port);
     console.info('WebHooks server is listening on port', port);
     return srv;
 };
 
 exports.startJsonPostServer = startJsonPostServer;
+
+function isHeroku() {
+    for (var key in HEROKU_ENVIRONMENT) {
+        var value = HEROKU_ENVIRONMENT[key];
+        var env = process.env[key];
+        if (!env || typeof value === 'string' && value !== env || !value.test(env)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+var HEROKU_ENVIRONMENT = {
+    DYNO: /^web\.\d+'$/,
+    PORT: /^\d+$/,
+    NODE_HOME: '/app/.heroku/node',
+    _: '/app/.heroku/node/bin/node'
+};
