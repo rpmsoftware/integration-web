@@ -19,6 +19,7 @@ function normalizePath(path) {
 }
 
 function herokuEnsureHttps(req, res, next) {
+    console.log('herokuEnsureHttps', req.headers['x-forwarded-proto']);
     if (req.headers['x-forwarded-proto'] === 'https') {
         return next();
     }
@@ -33,14 +34,16 @@ function startJsonPostServer(port, path, options, callback) {
         path = options.path;
     }
     var app = express();
-    app.use(bodyParser.json());
-    app.post(normalizePath(path), callback);
-    var srv;
-    if (isHeroku()) {
+    var heroku = isHeroku();
+    if(heroku) {
         console.log('Heroku is found');
         app.use(herokuEnsureHttps);
         port = process.env.PORT;
-    } else {
+    }
+    app.use(bodyParser.json());
+    app.post(normalizePath(path), callback);
+    var srv;
+    if (!heroku) {
         console.log('Not Heroku environment');
         app = https.createServer(options, app);
     }
@@ -52,7 +55,6 @@ function startJsonPostServer(port, path, options, callback) {
 exports.startJsonPostServer = startJsonPostServer;
 
 function isHeroku() {
-    console.log('env:',process.env);
     for (var key in HEROKU_ENVIRONMENT) {
         var value = HEROKU_ENVIRONMENT[key];
         var env = process.env[key];
