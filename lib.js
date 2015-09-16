@@ -56,7 +56,7 @@ function isHeroku() {
     for (var key in HEROKU_ENVIRONMENT) {
         var value = HEROKU_ENVIRONMENT[key];
         var env = process.env[key];
-        if (!env || typeof value === 'string' && value !== env || !value.test(env)) {
+        if (!env || typeof value === 'string' && value !== env || value.test && !value.test(env)) {
             console.log(key,value,env);
             return false;
         }
