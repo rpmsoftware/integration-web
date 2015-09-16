@@ -37,6 +37,7 @@ function startJsonPostServer(port, path, options, callback) {
     app.post(normalizePath(path), callback);
     var srv;
     if (isHeroku()) {
+        console.log('Heroku is found');
         app.use(herokuEnsureHttps);
         port = process.env.PORT;
     } else {
