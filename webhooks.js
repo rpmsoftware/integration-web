@@ -22,8 +22,12 @@
         }
     }
 
-    exports.start = function (port, path, options, callback) {
-        return lib.startJsonPostServer(port, path, options, function (req, res) {
+    exports.start = function () {
+        
+        var last = arguments.length-1;
+        var callback = arguments[last];
+        
+        arguments[last] = function (req, res) {
             res.contentType = 'plain/text';
             try {
                 validateHeaders(req.headers);
@@ -39,7 +43,9 @@
             if (typeof callback === 'function') {
                 callback(req.body, req);
             }
-        });
+        };
+        
+        return lib.startJsonPostServer.apply(undefined, arguments);
     };
 
     function WebHooksRequestData(processId, formId, eventName) {
