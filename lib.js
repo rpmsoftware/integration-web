@@ -65,7 +65,7 @@ function isHeroku() {
 }
 
 var HEROKU_ENVIRONMENT = {
-    DYNO: /^web\.\d+'$/,
+    DYNO: /^web\.\d+$/,
     PORT: /^\d+$/,
     NODE_HOME: '/app/.heroku/node',
     _: '/app/.heroku/node/bin/node'
