@@ -22,31 +22,31 @@
     }
 
     exports.start = function (config, callback) {
-
         var secret = config.signSecret;
-
         var theCallback = function (req, res) {
-            res.contentType = 'plain/text';
+            var body;
             try {
                 validateHeaders(req.headers);
-                validateWebHooksRequest(req.body);
                 validateSignature(req.headers['x-rpm-signature'], req.body, secret);
+                body = JSON.parse(req.body);
+                validateWebHooksRequest(body);
             } catch (err) {
                 console.error(err);
                 res.status(400).send(err);
                 return;
             }
             res.send();
-            req.body.InstanceID = req.headers['x-rpm-instanceid'];
-            req.body.Instance = req.headers['x-rpm-instance'];
-            req.body.Subscriber = req.headers['x-rpm-subscriber'];
+            body.InstanceID = req.headers['x-rpm-instanceid'];
+            body.Instance = req.headers['x-rpm-instance'];
+            body.Subscriber = req.headers['x-rpm-subscriber'];
             if (typeof callback === 'function') {
-                callback(req.body, req);
+                callback(body, req);
             }
         };
 
         return lib.startJsonPostServer(config, theCallback);
     };
+
 
     function WebHooksRequestData(processId, formId, eventName, statusId) {
         this.ObjectID = formId;

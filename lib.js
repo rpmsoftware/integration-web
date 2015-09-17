@@ -25,7 +25,7 @@ function herokuEnsureHttps(req, res, next) {
     res.status(404).send('https please');
 }
 
-function startJsonPostServer(port, path, options, callback) {
+function startPostServer(port, path, options, callback) {
     if (arguments.length < 3) {
         callback = path;
         options = port;
@@ -34,11 +34,11 @@ function startJsonPostServer(port, path, options, callback) {
     }
     var app = express();
     var heroku = isHeroku();
-    if(heroku) {
+    if (heroku) {
         app.use(herokuEnsureHttps);
         port = process.env.PORT;
     }
-    app.use(bodyParser.json());
+    app.use(bodyParser.text({type: '*/*'}) );
     app.post(normalizePath(path), callback);
     var srv;
     if (!heroku) {
@@ -49,7 +49,7 @@ function startJsonPostServer(port, path, options, callback) {
     return srv;
 };
 
-exports.startJsonPostServer = startJsonPostServer;
+exports.startPostServer = startPostServer;
 
 function isHeroku() {
     for (var key in HEROKU_ENVIRONMENT) {
