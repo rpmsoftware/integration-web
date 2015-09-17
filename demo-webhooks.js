@@ -4,7 +4,7 @@ var config = rpmUtil.readConfig(undefined, 'config.json').webHook;
 var cpath = 'https://localhost:' + config.port + '/' + config.path;
 var RESTClient = require('node-rest-client').Client;
 
-var server = webhooks.start(config.port, config.path, config,
+var server = webhooks.start(config,
     function (request) {
         console.log('Server recieved: ', request);
     });
@@ -15,4 +15,5 @@ function send(headers, data) {
     });
 }
 
-send(new webhooks.WebHooksRequestHeader('telco', 100), new webhooks.WebHooksRequestData(100, 12, 'form.start'));
+var data = new webhooks.WebHooksRequestData(100, 12, 'form.start');
+send(new webhooks.WebHooksRequestHeader(33, 100, data, config.signSecret), data);
