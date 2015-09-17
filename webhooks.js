@@ -113,7 +113,4 @@
         }
     }
 
-    // validateSignature(request.headers['x-rpm-signature'], request.body, 'Alles dreht sich!');
-
-
 })();
