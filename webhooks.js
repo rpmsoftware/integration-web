@@ -44,7 +44,7 @@
             }
         };
 
-        return lib.startJsonPostServer(config, theCallback);
+        return lib.startPostServer(config, theCallback);
     };
 
 
