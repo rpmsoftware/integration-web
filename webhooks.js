@@ -13,6 +13,7 @@
     };
 
     function validateHeaders(headers) {
+        console.log('validateHeaders()');
         for (var key in headerPatterns) {
             var value = headers[key];
             if (!headerPatterns[key].test(value)) {
@@ -31,7 +32,7 @@
                 body = JSON.parse(req.body);
                 validateWebHooksRequest(body);
             } catch (err) {
-                console.error('Validation error:',JSON.stringify(err));
+                console.error('Validation error:', err);
                 res.status(400).send(err);
                 return;
             }
@@ -75,6 +76,7 @@
     ];
 
     function validateWebHooksRequest(obj) {
+        console.log('validateWebHooksRequest()');
         if (typeof obj === 'object' &&
             typeof obj.ObjectID === 'number' &&
             typeof obj.ParentID === 'number' &&
@@ -107,6 +109,7 @@
     }
 
     function validateSignature(signRecieved, data, secret) {
+        console.log('validateSignature()');
         var signCalculated = getSignature(data, secret);
         if (signCalculated !== signRecieved) {
             throw new Error(util.format('Wrong signature. Calculated: %s, recieved: %s', signCalculated, signRecieved));
