@@ -103,6 +103,9 @@
     var crypto = require('crypto');
 
     function getSignature(data, secret) {
+        if(secret===undefined) {
+            throw new Error(util.format('Signature secret is missing'));
+        }
         var hmac = crypto.createHmac('sha256', secret);
         hmac.update(typeof data === 'object' ? JSON.stringify(data) : '' + data);
         return hmac.digest('hex');
