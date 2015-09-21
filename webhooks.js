@@ -31,7 +31,7 @@
                 body = JSON.parse(req.body);
                 validateWebHooksRequest(body);
             } catch (err) {
-                console.error(err);
+                console.error('Validation error:',JSON.stringify(err));
                 res.status(400).send(err);
                 return;
             }
