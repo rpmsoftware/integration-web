@@ -105,6 +105,9 @@ function createOutlookTokenFactory(config) {
                     },
                     function (newToken) {
                         token = newToken || token;
+                        if (newToken) {
+                            console.log('Updated token: ', token);
+                        }
                         return token.token.access_token;
                     }
                 ]);
