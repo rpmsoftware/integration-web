@@ -49,7 +49,7 @@ function Office365Config(configuration) {
     });
 }
 
-var resource = 'https://outlook.office365.com';
+var resource = 'https://outlook.office.com';
 
 function createOAuth2(config) {
     if (!(config instanceof Office365Config)) {
@@ -123,7 +123,7 @@ function createOutlookClient(config) {
             return createOutlookTokenFactory(config);
         },
         function (getToken) {
-            var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/v1.0', getToken);
+            var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/beta', getToken);
             deferredResult.resolve(config.mailbox ? client.users.getUser(config.mailbox) : client, config);
         }
     ]);
