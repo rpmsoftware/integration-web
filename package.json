@@ -3,13 +3,13 @@
     "version": "0.2.0",
     "private": true,
     "files": [
-        "index.js",
         "config.office365.sample",
         "config.webhooks.sample",
         "demo-office365.js",
         "demo-webhooks.js",
         "lib.js",
         "office365.js",
+        "office365wh.js",
         "webhooks.js"
     ],
     "dependencies": {
