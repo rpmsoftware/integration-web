@@ -124,7 +124,7 @@ function createOutlookClient(config) {
         },
         function (getToken) {
             var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/beta', getToken);
-            deferredResult.resolve(config.mailbox ? client.users.getUser(config.mailbox) : client, config);
+            deferredResult.resolve(client.users.getUser(config.mailbox), config);
         }
     ]);
     return deferredResult;
