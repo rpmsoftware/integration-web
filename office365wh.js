@@ -166,3 +166,4 @@ Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {
 	};
 })();
 
+exports.Subscription = Subscription;
