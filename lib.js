@@ -2,6 +2,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var https = require('https');
+var rpmUtil = require('integration-common/util');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
@@ -33,12 +34,12 @@ function startPostServer(port, path, options, callback) {
         path = options.path;
     }
     var app = express();
-    var heroku = isHeroku();
+    var heroku = rpmUtil.isHeroku();
     if (heroku) {
         app.use(herokuEnsureHttps);
         port = process.env.PORT;
     }
-    app.use(bodyParser.text({type: '*/*'}) );
+    app.use(bodyParser.text({ type: '*/*' }));
     app.post(normalizePath(path), callback);
     var srv;
     if (!heroku) {
@@ -51,19 +52,3 @@ function startPostServer(port, path, options, callback) {
 
 exports.startPostServer = startPostServer;
 
-function isHeroku() {
-    for (var key in HEROKU_ENVIRONMENT) {
-        var value = HEROKU_ENVIRONMENT[key];
-        var env = process.env[key];
-        if (!env || typeof value === 'string' && value !== env || value.test && !value.test(env)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-var HEROKU_ENVIRONMENT = {
-    DYNO: /^web\.\d+$/,
-    PORT: /^\d+$/,
-    NODE_HOME: '/app/.heroku/node',
-};
