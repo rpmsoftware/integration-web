@@ -21,10 +21,9 @@
             }
         }
     }
-
-    exports.start = function (config, callback) {
-        var secret = config.signSecret;
-        var theCallback = function (req, res) {
+    
+    function createRpmWebHookCallback(secret, callback) {
+        return function (req, res) {
             var body;
             try {
                 validateHeaders(req.headers);
@@ -44,8 +43,12 @@
                 callback(body, req);
             }
         };
+    }
+    
+    exports.createRpmWebHookCallback = createRpmWebHookCallback;
 
-        return lib.startPostServer(config, theCallback);
+    exports.start = function (config, callback) {
+        return lib.startPostServer(config, createRpmWebHookCallback(config.secret, callback));
     };
 
 

@@ -40,7 +40,15 @@ function startPostServer(port, path, options, callback) {
         port = process.env.PORT;
     }
     app.use(bodyParser.text({ type: '*/*' }));
-    app.post(normalizePath(path), callback);
+    if (typeof callback === 'object') {
+        for (var path in callback) {
+            var cb = callback[path];
+            path = normalizePath(path);
+            app.post(path, cb);
+        }
+    } else {
+        app.post(normalizePath(path), callback);
+    }
     var srv;
     if (!heroku) {
         app = https.createServer(options, app);
