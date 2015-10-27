@@ -13,12 +13,11 @@ function Subscription(context, path, data) {
 		return;
 	}
 
-	// "@odata.context": "https://outlook.office.com/api/beta/$metadata#Me/Subscriptions/$entity",
-	this._ResourceURL = data.ResourceURL;
-	this._ClientState = data.ClientState;
-	this._CallbackURL = data.CallbackURL;
-	this._ExpirationTime = new Date(data.ExpirationTime).getTime();
-	this._ChangeType = data.ChangeType;
+	this._ResourceURL = data.resource;
+	this._ClientState = data.context;
+	this._CallbackURL = data.notificationURL;
+	this._ExpirationTime = new Date(data.subscriptionExpirationDateTime).getTime();
+	this._ChangeType = data.changeType;
 	this._AquiredTime = Date.now();
 	this._ttl = this._ExpirationTime - this._AquiredTime;
 }
@@ -132,10 +131,10 @@ Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, c
 	request.method = 'POST';
 	request.data = JSON.stringify({
 		'@odata.type': ODATA_TYPE_PUSH_SUBSCRIPTION,
-		ResourceURL: resource.path,
-		CallbackURL: callbackUrl,
-		ChangeType: normalizeChangeTypes(changeTypes),
-		ClientState: clientState || uuid.v4()
+		resource: resource.path,
+		notificationURL: callbackUrl,
+		changeType: normalizeChangeTypes(changeTypes),
+		context: clientState || uuid.v4()
 	});
 	var _this = this;
 	var deferred = new Deferred();
