@@ -130,5 +130,13 @@ function createOutlookClient(config) {
     return deferredResult;
 }
 
+function logMsError (error) {
+    console.error('Error:', error);
+    if (typeof error.getAllResponseHeaders === 'function') {
+        console.error('Error headers:', error.getAllResponseHeaders());
+    }
+};
+
+exports.logMsError = logMsError;
 exports.createOutlookClient = createOutlookClient;
 exports.createOutlookTokenFactory = createOutlookTokenFactory;
