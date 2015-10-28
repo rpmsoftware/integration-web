@@ -101,8 +101,15 @@ function Subscriptions(context, path) {
 
 Subscriptions.prototype = Object.create(outlook.EntityFetcher.prototype);
 
+var CHANGE_TYPE_CREATED = exports.CHANGE_TYPE_CREATED = 'Created';
+var CHANGE_TYPE_UPDATED = exports.CHANGE_TYPE_UPDATED = 'Updated';
+var CHANGE_TYPE_DELETED = exports.CHANGE_TYPE_DELETED = 'Deleted';
+
 var normalizeChangeTypes = (function () {
-	var CHANGE_TYPES = { created: 'Created', updated: 'Updated', deleted: 'Deleted' };
+	var CHANGE_TYPES = {};
+	[CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED].forEach(function (ct) {
+		CHANGE_TYPES[ct.toLowerCase()] = ct;
+	});
 	var SEPARATOR = ',';
 	return function (changeTypes) {
 		if (typeof changeTypes === 'string') {
