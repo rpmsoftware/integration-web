@@ -130,13 +130,23 @@ function createOutlookClient(config) {
     return deferredResult;
 }
 
-function logMsError (error) {
+function logMsError(error) {
     console.error('Error:', error);
     if (typeof error.getAllResponseHeaders === 'function') {
         console.error('Error headers:', error.getAllResponseHeaders());
     }
 };
 
+
+
 exports.logMsError = logMsError;
 exports.createOutlookClient = createOutlookClient;
 exports.createOutlookTokenFactory = createOutlookTokenFactory;
+
+exports.getODataType = function (object) {
+    return object['@odata.type'];
+};
+
+exports.getODataEtag = function (object) {
+    return object['@odata.etag'];
+};

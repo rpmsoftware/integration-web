@@ -2,6 +2,7 @@ var uuid = require('node-uuid');
 var Microsoft = require("node-outlook").Microsoft;
 var outlook = Microsoft.OutlookServices;
 var Deferred = Microsoft.Utility.Deferred;
+var office365 = require('./office365');
 
 var ODATA_TYPE_PUSH_SUBSCRIPTION = "#Microsoft.OutlookServices.PushSubscription";
 
@@ -104,9 +105,9 @@ Subscriptions.prototype = Object.create(outlook.EntityFetcher.prototype);
 var CHANGE_TYPE_CREATED = exports.CHANGE_TYPE_CREATED = 'Created';
 var CHANGE_TYPE_UPDATED = exports.CHANGE_TYPE_UPDATED = 'Updated';
 var CHANGE_TYPE_DELETED = exports.CHANGE_TYPE_DELETED = 'Deleted';
+var CHANGE_TYPES = {};
 
 var normalizeChangeTypes = (function () {
-	var CHANGE_TYPES = {};
 	[CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED].forEach(function (ct) {
 		CHANGE_TYPES[ct.toLowerCase()] = ct;
 	});
@@ -173,3 +174,24 @@ Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {
 })();
 
 exports.Subscription = Subscription;
+
+function isResource(object) {
+    return object
+        && office365.getODataType(object)
+        && object['@odata.id']
+        && office365.getODataEtag(object)
+        && object.Id;
+}
+
+exports.isResource = isResource;
+
+var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
+
+exports.isNotification = function (object) {
+    return office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
+        && typeof object.sequenceNumber === 'number'
+        && object.subscriptionId
+        && CHANGE_TYPES[object.changeType]
+        && object.resource
+        && isResource(object.resourceData);
+};
