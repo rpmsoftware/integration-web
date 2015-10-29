@@ -147,6 +147,32 @@ exports.getODataType = function (object) {
     return object['@odata.type'];
 };
 
-exports.getODataEtag = function (object) {
-    return object['@odata.etag'];
+
+var ETAG_REGEX = /^\s*(W\/)?\s*"(\w+)"\s*$/;
+
+function getODataEtag (object, asObject) {
+    var result = object['@odata.etag'];
+    if(result && asObject) {
+        result = new ETag(result);
+    } 
+    return result;
+}
+
+exports.getODataEtag = getODataEtag;
+
+function ETag(str) {
+    var parts = str.match(ETAG_REGEX);
+    if (!parts) {
+        throw new TypeError('Not an ETag: ' + str);
+    }
+    this.weak = Boolean(parts[1]);
+    this.tag = parts[2];
+}
+
+
+ETag.prototype.toString = function () {
+    return (this.weak ? 'W/' : '') + '"' + this.tag + '"';
 };
+
+exports.ETag = ETag;
+
