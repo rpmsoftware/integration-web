@@ -189,6 +189,12 @@ exports.isResource = isResource;
 var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
 
 exports.isNotification = function (object) {
+	console.log(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION);
+	console.log(typeof object.sequenceNumber === 'number');
+	console.log(object.subscriptionId);
+	console.log(CHANGE_TYPES[object.changeType]);
+	console.log(object.resource);
+	console.log(isResource(object.resourceData));
     return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
         && typeof object.sequenceNumber === 'number'
         && object.subscriptionId
@@ -196,4 +202,3 @@ exports.isNotification = function (object) {
         && object.resource
         && isResource(object.resourceData));
 };
-
