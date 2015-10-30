@@ -108,9 +108,9 @@ var CHANGE_TYPE_DELETED = exports.CHANGE_TYPE_DELETED = 'Deleted';
 var CHANGE_TYPES = {};
 
 var normalizeChangeTypes = (function () {
-	[CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED].forEach(function (ct) {
-		CHANGE_TYPES[ct.toLowerCase()] = ct;
-		CHANGE_TYPES[ct] = ct;
+	[CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED].forEach(function (changeType) {
+		CHANGE_TYPES[changeType] = changeType;
+		CHANGE_TYPES[changeType.toLowerCase()] = changeType;
 	});
 	var SEPARATOR = ',';
 	return function (changeTypes) {
@@ -189,7 +189,6 @@ exports.isResource = isResource;
 var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
 
 exports.isNotification = function (object) {
-	console.log(CHANGE_TYPES);
     return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
         && typeof object.sequenceNumber === 'number'
         && object.subscriptionId
