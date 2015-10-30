@@ -110,6 +110,7 @@ var CHANGE_TYPES = {};
 var normalizeChangeTypes = (function () {
 	[CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED].forEach(function (ct) {
 		CHANGE_TYPES[ct.toLowerCase()] = ct;
+		CHANGE_TYPES[ct] = ct;
 	});
 	var SEPARATOR = ',';
 	return function (changeTypes) {
@@ -176,11 +177,11 @@ Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {
 exports.Subscription = Subscription;
 
 function isResource(object) {
-    return object
+    return Boolean(object
         && office365.getODataType(object)
         && object['@odata.id']
         && office365.getODataEtag(object)
-        && object.Id;
+        && object.Id);
 }
 
 exports.isResource = isResource;
@@ -188,10 +189,11 @@ exports.isResource = isResource;
 var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
 
 exports.isNotification = function (object) {
-    return office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
+    return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
         && typeof object.sequenceNumber === 'number'
         && object.subscriptionId
         && CHANGE_TYPES[object.changeType]
         && object.resource
-        && isResource(object.resourceData);
+        && isResource(object.resourceData));
 };
+
