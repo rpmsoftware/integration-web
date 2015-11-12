@@ -29,6 +29,20 @@ function herokuEnsureHttps(req, res, next) {
 function startPostServer(port, path, options, callback) {
     if (arguments.length < 3) {
         callback = path;
+    }
+    var app = createExpressApp(port, path, options);
+    if (typeof callback === 'object') {
+        for (var path in callback) {
+            app.post(normalizePath(path), callback[path]);
+        }
+    } else {
+        app.post(normalizePath(path), callback);
+    }
+    return app.startServer();
+};
+
+function createExpressApp(port, path, options) {
+    if (arguments.length < 2) {
         options = port;
         port = options.port;
         path = options.path;
@@ -40,23 +54,14 @@ function startPostServer(port, path, options, callback) {
         port = process.env.PORT;
     }
     app.use(bodyParser.text({ type: '*/*' }));
-    if (typeof callback === 'object') {
-        for (var path in callback) {
-            var cb = callback[path];
-            path = normalizePath(path);
-            app.post(path, cb);
-        }
-    } else {
-        app.post(normalizePath(path), callback);
-    }
-    var srv;
-    if (!heroku) {
-        app = https.createServer(options, app);
-    }
-    srv = app.listen(port);
-    console.info('WebHooks server is listening on port', port);
-    return srv;
+    app.startServer = function () {
+        var srv = (heroku ? app : https.createServer(options, app)).listen(port); 
+        console.info('WebHooks server is listening on port', port);
+        return srv;
+    };
+    return app;
 };
 
 exports.startPostServer = startPostServer;
-
+exports.createExpressApp = createExpressApp;
+exports.normalizePath = normalizePath;
