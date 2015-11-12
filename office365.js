@@ -116,14 +116,14 @@ function createOutlookTokenFactory(config) {
     ]);
 }
 
-function createOutlookClient(config) {
+function createOutlookClient(config, beta) {
     var deferredResult = new MsDeferred();
     promised.seq([
         function () {
             return createOutlookTokenFactory(config);
         },
         function (getToken) {
-            var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/beta', getToken);
+            var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/' + (beta ? 'beta' : 'v1.0'), getToken);
             deferredResult.resolve(client.users.getUser(config.mailbox), config);
         }
     ]);

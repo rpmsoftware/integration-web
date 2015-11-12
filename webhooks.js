@@ -21,7 +21,7 @@
             }
         }
     }
-    
+
     function createRpmWebHookCallback(secret, callback) {
         return function (req, res) {
             var body;
@@ -30,6 +30,7 @@
                 validateSignature(req.headers['x-rpm-signature'], req.body, secret);
                 body = JSON.parse(req.body);
                 validateWebHooksRequest(body);
+                body.time = new Date();
             } catch (err) {
                 console.error('Validation error:', err);
                 res.status(400).send(err);
@@ -44,7 +45,7 @@
             }
         };
     }
-    
+
     exports.createRpmWebHookCallback = createRpmWebHookCallback;
 
     exports.start = function (config, callback) {
@@ -106,7 +107,7 @@
     var crypto = require('crypto');
 
     function getSignature(data, secret) {
-        if(secret===undefined) {
+        if (secret === undefined) {
             throw new Error(util.format('Signature secret is missing'));
         }
         var hmac = crypto.createHmac('sha256', secret);
