@@ -1,10 +1,9 @@
+/* global Promise */
 var fs = require('fs');
 var jws = require('jws');
 var uuid = require('node-uuid');
 var outlook = require("node-outlook");
 var simpleOAuth2 = require('simple-oauth2');
-var MsDeferred = outlook.Microsoft.Utility.Deferred;
-var promised = require('promised-io/promise');
 
 var configDefaults = {
     tokenTTL: 15 // minutes
@@ -67,19 +66,20 @@ var createToken = (function () {
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
     };
     return function () {
-        var deferred = new MsDeferred();
-        this.client.getToken(params, function (error, result) {
-            if (error) {
-                console.error('Access Token Error: ', error);
-                deferred.reject(error);
-            } else {
-                result.expires_in = +result.expires_in - 10;
-                result.expires_on = +result.expires_on;
-                result.not_before = +result.not_before;
-                deferred.resolve(result);
-            }
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            self.client.getToken(params, function (error, result) {
+                if (error) {
+                    console.error('Access Token Error: ', error);
+                    reject(error);
+                } else {
+                    result.expires_in = +result.expires_in - 10;
+                    result.expires_on = +result.expires_on;
+                    result.not_before = +result.not_before;
+                    resolve(result);
+                }
+            });
         });
-        return deferred;
     };
 })();
 
@@ -89,49 +89,30 @@ function createOutlookTokenFactory(config) {
         config = new Office365Config(config);
     }
     var oauth2 = createOAuth2(config);
+    return oauth2.createToken().then(function (token) {
+        token = oauth2.accessToken.create(token);
+        return function getToken() {
+            return token.expired()
+                ? oauth2.createToken().then(function (newToken) {
+                    token = oauth2.accessToken.create(newToken);
+                    console.log('Updated token: ', token);
+                    return token.token.access_token;
+                })
+                : Promise.resolve(token.token.access_token);
 
-    return promised.seq([
-        function () {
-            return oauth2.createToken();
-        },
-        function (token) {
-            token = oauth2.accessToken.create(token);
-            return function getToken() {
-                return promised.seq([
-                    function () {
-                        if (token.expired()) {
-                            return oauth2.createToken();
-                        }
-                    },
-                    function (newToken) {
-                        if (newToken) {
-                            token = oauth2.accessToken.create(newToken);
-                            console.log('Updated token: ', token);
-                        }
-                        return token.token.access_token;
-                    }
-                ]);
-            };
-        }
-    ]);
+        };
+    });
 }
 
 function createOutlookClient(config, beta) {
-    var deferredResult = new MsDeferred();
-    promised.seq([
-        function () {
-            return createOutlookTokenFactory(config);
-        },
-        function (getToken) {
-            var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/' + (beta ? 'beta' : 'v1.0'), getToken);
-            deferredResult.resolve(client.users.getUser(config.mailbox), config);
-        }
-    ]);
-    return deferredResult;
+    return createOutlookTokenFactory(config).then(function (getToken) {
+        var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/' + (beta ? 'beta' : 'v1.0'), getToken);
+        return client.users.getUser(config.mailbox);
+    });
 }
 
 function logMsError(error) {
-    console.error('Error:', error);
+    console.error('Error:', error, error.stack);
     if (typeof error.getAllResponseHeaders === 'function') {
         console.error('Error headers:', error.getAllResponseHeaders());
     }
@@ -150,11 +131,11 @@ exports.getODataType = function (object) {
 
 var ETAG_REGEX = /^\s*(W\/)?\s*"(\w+)"\s*$/;
 
-function getODataEtag (object, asObject) {
+function getODataEtag(object, asObject) {
     var result = object['@odata.etag'];
-    if(result && asObject) {
+    if (result && asObject) {
         result = new ETag(result);
-    } 
+    }
     return result;
 }
 

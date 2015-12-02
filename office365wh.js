@@ -1,7 +1,7 @@
+/* global Promise */
 var uuid = require('node-uuid');
 var Microsoft = require("node-outlook").Microsoft;
 var outlook = Microsoft.OutlookServices;
-var Deferred = Microsoft.Utility.Deferred;
 var office365 = require('./office365');
 
 var ODATA_TYPE_PUSH_SUBSCRIPTION = "#Microsoft.OutlookServices.PushSubscription";
@@ -76,19 +76,20 @@ Object.defineProperty(Subscription.prototype, "aquiredTime", {
 
 Subscription.prototype.update = function () {
 	var _this = this;
-	var deferred = new Deferred();
-	var request = new outlook.Extensions.Request(this.getPath('renew'));
+	return new Promise(function (resolve, reject) {
 
-	request.method = 'POST';
+		var request = new outlook.Extensions.Request(this.getPath('renew'));
 
-	var expirationTime = Date.now() + this._ttl;
+		request.method = 'POST';
 
-	this.context.request(request).then(function (data) {
-		_this._AquiredTime = Date.now();
-		_this._ExpirationTime = expirationTime;
-		deferred.resolve(data);
-	}, deferred.reject.bind(deferred));
-	return deferred;
+		var expirationTime = Date.now() + this._ttl;
+
+		this.context.request(request).then(function (data) {
+			_this._AquiredTime = Date.now();
+			_this._ExpirationTime = expirationTime;
+			resolve(data);
+		}, reject);
+	});
 };
 
 Subscription.prototype.expired = function () {
@@ -148,15 +149,15 @@ Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, c
 		changeType: normalizeChangeTypes(changeTypes),
 		context: clientState || uuid.v4()
 	});
-	var _this = this;
-	var deferred = new Deferred();
-	this.context.request(request).then((function (data) {
-		data = JSON.parse(data);
-		data = new Subscription(_this.context, data['@odata.id'], data);
-		this._Existing.push(data);
-		deferred.resolve(data);
-	}).bind(this), deferred.reject.bind(deferred));
-	return deferred;
+	var self = this;
+	return new Promise(function (resolve, reject) {
+		this.context.request(request).then(function (data) {
+			data = JSON.parse(data);
+			data = new Subscription(self.context, data['@odata.id'], data);
+			self._Existing.push(data);
+			resolve(data);
+		}, reject);
+	});
 };
 
 Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {

@@ -30,7 +30,7 @@ function startPostServer(port, path, options, callback) {
     if (arguments.length < 3) {
         callback = path;
     }
-    var app = createExpressApp(port, path, options);
+    var app = createExpressApp(port, options);
     if (typeof callback === 'object') {
         for (var path in callback) {
             app.post(normalizePath(path), callback[path]);
@@ -41,11 +41,10 @@ function startPostServer(port, path, options, callback) {
     return app.startServer();
 };
 
-function createExpressApp(port, path, options) {
-    if (arguments.length < 2) {
+function createExpressApp(port, options) {
+    if (!options) {
         options = port;
         port = options.port;
-        path = options.path;
     }
     var app = express();
     var heroku = rpmUtil.isHeroku();
