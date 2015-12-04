@@ -27,8 +27,9 @@ function herokuEnsureHttps(req, res, next) {
 }
 
 function startPostServer(port, path, options, callback) {
-    if (arguments.length < 3) {
+    if (typeof port === 'object') {
         callback = path;
+        path = port.path;
     }
     var app = createExpressApp(port, options);
     if (typeof callback === 'object') {
@@ -54,7 +55,7 @@ function createExpressApp(port, options) {
     }
     app.use(bodyParser.text({ type: '*/*' }));
     app.startServer = function () {
-        var srv = (heroku ? app : https.createServer(options, app)).listen(port); 
+        var srv = (heroku ? app : https.createServer(options, app)).listen(port);
         console.info('WebHooks server is listening on port', port);
         return srv;
     };
