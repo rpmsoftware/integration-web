@@ -1,4 +1,4 @@
-/* global Promise */
+/* global process */
 var fs = require('fs');
 var jws = require('jws');
 var uuid = require('node-uuid');
@@ -51,10 +51,7 @@ function Office365Config(configuration) {
 var resource = 'https://outlook.office.com';
 
 function createOAuth2(config) {
-    if (!(config instanceof Office365Config)) {
-        config = new Office365Config(config);
-    }
-    var oauth2 = simpleOAuth2(config);
+    var oauth2 = simpleOAuth2(normalizeConfig(config));
     oauth2.createToken = createToken;
     return oauth2;
 }
@@ -83,12 +80,12 @@ var createToken = (function () {
     };
 })();
 
-function createOutlookTokenFactory(config) {
+function normalizeConfig(config) {
+    return config instanceof Office365Config ? config : new Office365Config(config);
+}
 
-    if (!(config instanceof Office365Config)) {
-        config = new Office365Config(config);
-    }
-    var oauth2 = createOAuth2(config);
+function createOutlookTokenFactory(config) {
+    var oauth2 = createOAuth2(normalizeConfig(config));
     return oauth2.createToken().then(function (token) {
         token = oauth2.accessToken.create(token);
         return function getToken() {
@@ -104,15 +101,15 @@ function createOutlookTokenFactory(config) {
     });
 }
 
-function createOutlookClient(config, beta) {
+function createOutlookClient(config) {
     return createOutlookTokenFactory(config).then(function (getToken) {
-        var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/' + (beta ? 'beta' : 'v1.0'), getToken);
+        var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/v2.0', getToken);
         return client.users.getUser(config.mailbox);
     });
 }
 
 function logMsError(error) {
-    console.error('Error:', error, error.stack);
+    console.error(error, error.stack);
     if (typeof error.getAllResponseHeaders === 'function') {
         console.error('Error headers:', error.getAllResponseHeaders());
     }
