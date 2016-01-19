@@ -6,6 +6,9 @@ var office365 = require('./office365');
 
 var ODATA_TYPE_PUSH_SUBSCRIPTION = "#Microsoft.OutlookServices.PushSubscription";
 
+var SUBSCRIPTION_DAYS_TO_LIVE = 3;
+
+
 function Subscription(context, path, data) {
 	outlook.Entity.call(this, context, path, data);
 	this._odataType = ODATA_TYPE_PUSH_SUBSCRIPTION;
@@ -14,20 +17,21 @@ function Subscription(context, path, data) {
 		return;
 	}
 
-	this._ResourceURL = data.resource;
-	this._ClientState = data.context;
-	this._CallbackURL = data.notificationURL;
-	this._ExpirationTime = new Date(data.subscriptionExpirationDateTime).getTime();
-	this._ChangeType = data.changeType;
+	this._Resource = data.Resource;
+	this._ClientState = data.ClientState;
+	this._NotificationURL = data.NotificationURL;
+	this._ExpirationTime = new Date(data.SubscriptionExpirationDateTime).getTime();
+	this._ChangeType = data.ChangeType;
 	this._AquiredTime = Date.now();
 	this._ttl = this._ExpirationTime - this._AquiredTime;
+
 }
 
 Subscription.prototype = Object.create(outlook.Entity.prototype);
 
-Object.defineProperty(Subscription.prototype, "resourceURL", {
+Object.defineProperty(Subscription.prototype, "resource", {
 	get: function () {
-		return this._ResourceURL;
+		return this._Resource;
 	},
 	enumerable: true,
 	configurable: true
@@ -41,9 +45,9 @@ Object.defineProperty(Subscription.prototype, "clientState", {
 	configurable: true
 });
 
-Object.defineProperty(Subscription.prototype, "callbackURL", {
+Object.defineProperty(Subscription.prototype, "notificationURL", {
 	get: function () {
-		return this._CallbackURL;
+		return this._NotificationURL;
 	},
 	enumerable: true,
 	configurable: true
@@ -78,15 +82,26 @@ Subscription.prototype.update = function () {
 	var _this = this;
 	return new Promise(function (resolve, reject) {
 
-		var request = new outlook.Extensions.Request(this.getPath('renew'));
+		var request = new outlook.Extensions.Request(_this.path);
 
-		request.method = 'POST';
+		request.method = 'PATCH';
 
-		var expirationTime = Date.now() + this._ttl;
 
-		this.context.request(request).then(function (data) {
+		var exp = new Date();
+		exp.setDate(exp.getDate() + SUBSCRIPTION_DAYS_TO_LIVE);
+		exp.setMilliseconds(0);
+		exp.setMinutes(0);
+		exp.setSeconds(0);
+		exp.setHours(0);
+
+		request.data = {
+			'@odata.type': ODATA_TYPE_PUSH_SUBSCRIPTION,
+			SubscriptionExpirationDateTime: exp
+		};
+		
+		_this.context.request(request).then(function (data) {
 			_this._AquiredTime = Date.now();
-			_this._ExpirationTime = expirationTime;
+			_this._ExpirationTime = exp.getTime();
 			resolve(data);
 		}, reject);
 	});
@@ -144,16 +159,17 @@ Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, c
 	request.method = 'POST';
 	request.data = JSON.stringify({
 		'@odata.type': ODATA_TYPE_PUSH_SUBSCRIPTION,
-		resource: resource.path,
-		notificationURL: callbackUrl,
-		changeType: normalizeChangeTypes(changeTypes),
-		context: clientState || uuid.v4()
+		Resource: resource.path,
+		NotificationURL: callbackUrl,
+		ChangeType: normalizeChangeTypes(changeTypes),
+		ClientState: clientState || uuid.v4()
 	});
 	var self = this;
 	return new Promise(function (resolve, reject) {
-		this.context.request(request).then(function (data) {
+		self.context.request(request).then(function (data) {
+			console.log('NEW SUBSC: ', data);
 			data = JSON.parse(data);
-			data = new Subscription(self.context, data['@odata.id'], data);
+			data = new Subscription(self.context, self.getPath(data.Id), data);
 			self._Existing.push(data);
 			resolve(data);
 		}, reject);
