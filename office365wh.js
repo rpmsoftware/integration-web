@@ -167,7 +167,6 @@ Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, c
 	var self = this;
 	return new Promise(function (resolve, reject) {
 		self.context.request(request).then(function (data) {
-			console.log('NEW SUBSC: ', data);
 			data = JSON.parse(data);
 			data = new Subscription(self.context, self.getPath(data.Id), data);
 			self._Existing.push(data);
@@ -215,4 +214,14 @@ exports.isNotification = function (object) {
         && CHANGE_TYPES[object.changeType]
         && object.resource
         && isResource(object.resourceData));
+};
+
+exports.respondToSubscriptionValidation = function (req, res) {
+	var validationToken = req.query.validationtoken;
+	if (validationToken) {
+		res.type('txt');
+		res.status(200);
+		res.send(validationToken);
+	}
+	return !!validationToken;
 };
