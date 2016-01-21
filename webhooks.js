@@ -79,20 +79,23 @@
         exports.EVENT_FORM_RESTORE
     ];
 
-    function validateWebHooksRequest(obj) {
-        console.log('validateWebHooksRequest()');
-        if (typeof obj === 'object' &&
+    function isWebHooksRequest(obj) {
+        return typeof obj === 'object' &&
             typeof obj.ObjectID === 'number' &&
             typeof obj.ParentID === 'number' &&
             (!obj.StatusID || typeof obj.StatusID === 'number') &&
             EVENT_NAMES.indexOf(obj.EventName) >= 0 &&
             obj.ObjectType === enumObjectType.Form &&
-            obj.ParentType === enumObjectType.PMTemplate) {
-            return;
-        }
-        throw 'Not a WebHooksRequest';
+            obj.ParentType === enumObjectType.PMTemplate;
     }
+    
+    exports.isWebHooksRequest = isWebHooksRequest;
 
+    function validateWebHooksRequest(obj) {
+        if (!isWebHooksRequest(obj)) {
+            throw 'Not a WebHooksRequest';
+        }
+    }
 
     exports.WebHooksRequestHeader = function WebHooksRequestHeader(rpmInstanceID, rpmSubscriber, request, secret) {
         this['x-rpm-instanceid'] = rpmInstanceID;

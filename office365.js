@@ -3,7 +3,39 @@ var fs = require('fs');
 var jws = require('jws');
 var uuid = require('node-uuid');
 var outlook = require("node-outlook");
+var DataContext = outlook.Microsoft.OutlookServices.Extensions.DataContext;
 var simpleOAuth2 = require('simple-oauth2');
+var assert = require('assert');
+
+function fixDates(data) {
+    assert.strictEqual(typeof data, 'object');
+    data.DateTimeCreated = data.CreatedDateTime;
+    data.DateTimeLastModified = data.LastModifiedDateTime;
+    if (Array.isArray(data.value)) {
+        data.value.forEach(function (value) {
+            fixDates(value);
+        });
+    }
+    return data;
+}
+
+DataContext.prototype._originalAjax = DataContext.prototype.ajax;
+DataContext.prototype.ajax = function (request) {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        self._originalAjax(request).then(
+            function (data) {
+                try {
+                    data = JSON.stringify(fixDates(JSON.parse(data)));
+                } catch (err) {
+                    console.error('Unexpected ', err, err.stack, data);
+                }
+                resolve(data);
+            },
+            reject);
+    });
+};
+
 
 var configDefaults = {
     tokenTTL: 15 // minutes
