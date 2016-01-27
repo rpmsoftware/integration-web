@@ -3,7 +3,8 @@ var fs = require('fs');
 var jws = require('jws');
 var uuid = require('node-uuid');
 var outlook = require("node-outlook");
-var DataContext = outlook.Microsoft.OutlookServices.Extensions.DataContext;
+
+var Microsoft = outlook.Microsoft;
 var simpleOAuth2 = require('simple-oauth2');
 var assert = require('assert');
 
@@ -18,6 +19,10 @@ function fixDates(data) {
     }
     return data;
 }
+
+var DataContext = Microsoft.OutlookServices.Extensions.DataContext;
+var Contact = Microsoft.OutlookServices.Contact;
+var Contacts = Microsoft.OutlookServices.Contacts;
 
 DataContext.prototype._originalAjax = DataContext.prototype.ajax;
 DataContext.prototype.ajax = function (request) {
@@ -36,6 +41,63 @@ DataContext.prototype.ajax = function (request) {
     });
 };
 
+function pathFnGetContacts(context, data) {
+    var self = this;
+    var pathFn = function (data) {
+        return self.getPath(data.Id);
+    };
+    return Contact.parseContacts(context, pathFn, data.value);
+};
+
+Contacts.prototype.getContacts = function () {
+    return new Microsoft.OutlookServices.Extensions.CollectionQuery(this.context, this.path, pathFnGetContacts.bind(this));
+};
+
+Microsoft.OutlookServices.ContactFetcher.prototype.fetch = function () {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        self.context.readUrl(self.path).then(
+            function (data) {
+                data = JSON.parse(data);
+                resolve(Contact.parseContact(self.context, self.getPath(data.Id), data));
+            },
+            reject);
+    });
+};
+
+Contact.prototype.update = function () {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        var request = new Microsoft.OutlookServices.Extensions.Request(self.path);
+        request.method = 'PATCH';
+        request.data = JSON.stringify(self.getRequestBody());
+        self.context.request(request).then(
+            function (data) {
+                data = JSON.parse(data);
+                resolve(Contact.parseContact(self.context, self.path, data));
+            },
+            reject);
+    });
+};
+
+Contacts.prototype.addContact = function (item) {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+
+        var request = new Microsoft.OutlookServices.Extensions.Request(self.path);
+
+        request.method = 'POST';
+        request.data = JSON.stringify(item.getRequestBody());
+
+        self.context.request(request).then(
+            function (data) {
+                data = JSON.parse(data);
+                resolve(Contact.parseContact(self.context, self.getPath(data.Id), data));
+            },
+            reject);
+
+    });
+};
 
 var configDefaults = {
     tokenTTL: 15 // minutes

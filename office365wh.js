@@ -209,11 +209,12 @@ var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
 
 exports.isNotification = function (object) {
     return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
-        && typeof object.sequenceNumber === 'number'
-        && object.subscriptionId
-        && CHANGE_TYPES[object.changeType]
-        && object.resource
-        && isResource(object.resourceData));
+        && typeof object.SequenceNumber === 'number'
+        && object.SubscriptionId
+        && object.SubscriptionExpirationDateTime
+        && CHANGE_TYPES[object.ChangeType]
+        && object.Resource
+        && isResource(object.ResourceData));
 };
 
 exports.respondToSubscriptionValidation = function (req, res) {
