@@ -3,6 +3,7 @@ var uuid = require('node-uuid');
 var Microsoft = require("node-outlook").Microsoft;
 var outlook = Microsoft.OutlookServices;
 var office365 = require('./office365');
+var util = require('util');
 
 var ODATA_TYPE_PUSH_SUBSCRIPTION = "#Microsoft.OutlookServices.PushSubscription";
 
@@ -236,7 +237,7 @@ exports.createOffice365WebHookCallback = function (callback, secret) {
             res.send();
             var clientState = req.headers.clientstate;
             if (secret && clientState !== secret) {
-                throw new Error('Event does not belong here. ClientState: "%s", expected: "%s"', clientState, secret);
+                throw util.format('Event does not belong here. ClientState received: "%s", expected: "%s"', clientState, secret);
             }
             if (typeof callback === 'function') {
                 callback(req.body, req);
