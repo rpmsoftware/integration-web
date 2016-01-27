@@ -31,7 +31,9 @@ DataContext.prototype.ajax = function (request) {
         self._originalAjax(request).then(
             function (data) {
                 try {
-                    data = JSON.stringify(fixDates(JSON.parse(data)));
+                    if(data) {
+                        data = JSON.stringify(fixDates(JSON.parse(data)));
+                    }
                 } catch (err) {
                     console.error('Unexpected ', err, err.stack, data);
                 }
