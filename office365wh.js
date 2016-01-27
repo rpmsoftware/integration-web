@@ -236,7 +236,7 @@ exports.createOffice365WebHookCallback = function (callback, secret) {
             res.send();
             var clientState = req.headers.clientstate;
             if (secret && clientState !== secret) {
-                throw new Error('Event does not belong here. ClientState: ' + clientState);
+                throw new Error('Event does not belong here. ClientState: "%s", expected: "%s"', clientState, secret);
             }
             if (typeof callback === 'function') {
                 callback(req.body, req);
