@@ -228,16 +228,16 @@ function respondToSubscriptionValidation(req, res) {
     return !!validationToken;
 };
 
-exports.createOffice365WebHookCallback = function (callback, secret) {
-    return function (req, res) {
+exports.createOffice365WebHookCallback = function (callback) {
+
+    var secret;
+
+    function actual(req, res) {
         try {
-            if (respondToSubscriptionValidation(req, res)) {
-                return;
-            }
             res.send();
             var clientState = req.headers.clientstate;
             if (secret && clientState !== secret) {
-                throw util.format('Event does not belong here. ClientState received: "%s", expected: "%s"', clientState, secret);
+                throw 'Event does not belong here. ClientState: ' + clientState;
             }
             if (typeof callback === 'function') {
                 callback(req.body, req);
@@ -246,5 +246,18 @@ exports.createOffice365WebHookCallback = function (callback, secret) {
             console.error(error);
         }
     };
-}
+
+    var process = function (req, res) {
+        if (respondToSubscriptionValidation(req, res)) {
+            secret = req.headers.clientstate;
+            console.log('Client State: ', secret);
+            process = actual;
+        }
+
+    };
+
+    return function (req, res) {
+        process(req, res);
+    };
+};
 
