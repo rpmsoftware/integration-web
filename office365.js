@@ -55,13 +55,18 @@ Contacts.prototype.getContacts = function () {
     return new Microsoft.OutlookServices.Extensions.CollectionQuery(this.context, this.path, pathFnGetContacts.bind(this));
 };
 
+Contacts.prototype.getContact = function (Id) {
+    return new Microsoft.OutlookServices.ContactFetcher(this.context, this.getPath(Id));
+};
+
+
 Microsoft.OutlookServices.ContactFetcher.prototype.fetch = function () {
     var self = this;
     return new Promise(function (resolve, reject) {
         self.context.readUrl(self.path).then(
             function (data) {
                 data = JSON.parse(data);
-                resolve(Contact.parseContact(self.context, self.getPath(data.Id), data));
+                resolve(Contact.parseContact(self.context, self.path, data));
             },
             reject);
     });

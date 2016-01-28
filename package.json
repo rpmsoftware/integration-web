@@ -1,6 +1,6 @@
 {
     "name": "integration-web",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "private": true,
     "files": [
         "config.office365.sample",
