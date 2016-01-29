@@ -230,22 +230,16 @@ function respondToSubscriptionValidation(req, res) {
 
 exports.createOffice365WebHookCallback = function (callback) {
 
-    var secret;
-
     return function (req, res) {
         try {
             if (respondToSubscriptionValidation(req, res)) {
-                secret = req.headers.clientstate;
-                console.log('New Client State: ', secret);
                 return;
             }
             res.send();
-            var clientState = req.headers.clientstate;
-            if (secret && clientState !== secret) {
-                throw 'Event does not belong here. ClientState: ' + clientState;
-            }
+            var body = JSON.parse(req.body);
+            body.clientState = req.headers.clientstate;
             if (typeof callback === 'function') {
-                callback(req.body, req);
+                callback(body, req);
             }
         } catch (error) {
             console.error(error);
