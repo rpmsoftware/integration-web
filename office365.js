@@ -87,6 +87,15 @@ Contact.prototype.update = function () {
     });
 };
 
+Contact.prototype.delete = function () {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        var request = new Microsoft.OutlookServices.Extensions.Request(self.path);
+        request.method = 'DELETE';
+        self.context.request(request).then(resolve, reject);
+    });
+};
+
 Contacts.prototype.addContact = function (item) {
     var self = this;
     return new Promise(function (resolve, reject) {
