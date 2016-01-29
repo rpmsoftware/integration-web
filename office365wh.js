@@ -232,8 +232,13 @@ exports.createOffice365WebHookCallback = function (callback) {
 
     var secret;
 
-    function actual(req, res) {
+    return function (req, res) {
         try {
+            if (respondToSubscriptionValidation(req, res)) {
+                secret = req.headers.clientstate;
+                console.log('New Client State: ', secret);
+                return;
+            }
             res.send();
             var clientState = req.headers.clientstate;
             if (secret && clientState !== secret) {
@@ -247,17 +252,5 @@ exports.createOffice365WebHookCallback = function (callback) {
         }
     };
 
-    var process = function (req, res) {
-        if (respondToSubscriptionValidation(req, res)) {
-            secret = req.headers.clientstate;
-            console.log('Client State: ', secret);
-            process = actual;
-        }
-
-    };
-
-    return function (req, res) {
-        process(req, res);
-    };
 };
 
