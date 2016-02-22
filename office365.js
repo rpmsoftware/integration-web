@@ -236,7 +236,7 @@ exports.getODataType = function (object) {
 };
 
 
-var ETAG_REGEX = /^\s*(W\/)?\s*"(\w+)"\s*$/;
+var ETAG_REGEX = /^\s*(W\/)?\s*"(\S+)"\s*$/;
 
 function getODataEtag(object, asObject) {
     var result = object['@odata.etag'];
