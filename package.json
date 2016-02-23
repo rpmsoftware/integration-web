@@ -1,6 +1,6 @@
 {
     "name": "integration-web",
-    "version": "0.5.8",
+    "version": "0.6.0",
     "private": true,
     "files": [
         "config.office365.sample",
@@ -10,7 +10,8 @@
         "lib.js",
         "office365.js",
         "office365wh.js",
-        "webhooks.js"
+        "webhooks.js",
+        "mandrill.js"
     ],
     "dependencies": {
         "express": "~4.12.4",
@@ -20,6 +21,7 @@
         "simple-oauth2": "^0.2.1",
         "jws": "^3.0.0",
         "node-uuid": "^1.4.3",
-        "integration-common": "https://github.com/rpmsoftware/integration-common.git"
+        "integration-common": "https://github.com/rpmsoftware/integration-common.git",
+        "mandrill-api":"^1.0.45"
     }
 }
