@@ -1,5 +1,6 @@
 var Mandrill = require('mandrill-api/mandrill').Mandrill;
 var logErrorStack = require('integration-common/util').logErrorStack;
+var util = require('util');
 
 var parseEmail = (function () {
     var p = /(^\s*(\S.*\S)\s*<\s*([\w\.]+@[\w\.]+)\s*>\s*$)|(^\s*([\w\.]+@[\w\.]+)\s*$)/;
@@ -66,8 +67,13 @@ exports.createErrorNotifier = function (config) {
     return function (error, subject) {
         logErrorStack(error);
         if (subject === undefined) {
-            subject = error.toString();
+            subject = error & error.toString();
         }
-        sendMessage(subject, error instanceof Error ? error.stack : error).then(undefined, logErrorStack);
+        if (error instanceof Error) {
+            error = error.stack;
+        } else if (typeof error === 'object') {
+            error = util.format('%j', error);
+        }
+        sendMessage(subject, error).then(undefined, logErrorStack);
     };
 };
