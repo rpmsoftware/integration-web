@@ -242,7 +242,7 @@ exports.createOffice365WebHookCallback = function (callback) {
                 callback(body, req);
             }
         } catch (error) {
-            console.error(error);
+            office365.logMsError(error);
         }
     };
 

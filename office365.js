@@ -3,6 +3,7 @@ var fs = require('fs');
 var jws = require('jws');
 var uuid = require('node-uuid');
 var outlook = require("node-outlook");
+var logError = require('integration-common/util').logErrorStack;
 
 var Microsoft = outlook.Microsoft;
 var simpleOAuth2 = require('simple-oauth2');
@@ -219,7 +220,7 @@ function createOutlookClient(config) {
 }
 
 function logMsError(error) {
-    console.error(error, error.stack);
+    logError(error);
     if (typeof error.getAllResponseHeaders === 'function') {
         console.error('Error headers:', error.getAllResponseHeaders());
     }
