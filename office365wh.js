@@ -223,6 +223,7 @@ function respondToSubscriptionValidation(req, res) {
     if (validationToken) {
         res.type('txt');
         res.status(200);
+        console.log('Responding to Subscription Validation Request with "%s"', validationToken);
         res.send(validationToken);
     }
     return !!validationToken;
