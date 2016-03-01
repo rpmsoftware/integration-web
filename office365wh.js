@@ -122,13 +122,12 @@ Subscriptions.prototype = Object.create(outlook.EntityFetcher.prototype);
 var CHANGE_TYPE_CREATED = exports.CHANGE_TYPE_CREATED = 'Created';
 var CHANGE_TYPE_UPDATED = exports.CHANGE_TYPE_UPDATED = 'Updated';
 var CHANGE_TYPE_DELETED = exports.CHANGE_TYPE_DELETED = 'Deleted';
-var CHANGE_TYPE_AKNOWLEDGEMENT = exports.CHANGE_TYPE_AKNOWLEDGEMENT = 'Acknowledgment';
 var CHANGE_TYPE_MISSED = exports.CHANGE_TYPE_MISSED = 'Missed';
 
 var CHANGE_TYPES = {};
 
 var normalizeChangeTypes = (function () {
-    [CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED, CHANGE_TYPE_AKNOWLEDGEMENT, CHANGE_TYPE_MISSED].forEach(function (changeType) {
+    [CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED, CHANGE_TYPE_MISSED].forEach(function (changeType) {
         CHANGE_TYPES[changeType] = changeType;
         CHANGE_TYPES[changeType.toLowerCase()] = changeType;
     });
@@ -209,13 +208,13 @@ exports.isResource = isResource;
 var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
 
 exports.isNotification = function (object) {
+    var changeType = CHANGE_TYPES[object.ChangeType];
     return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
         && typeof object.SequenceNumber === 'number'
         && object.SubscriptionId
         && object.SubscriptionExpirationDateTime
-        && CHANGE_TYPES[object.ChangeType]
-        && object.Resource
-        && isResource(object.ResourceData));
+        && changeType
+        && (object.Resource && isResource(object.ResourceData)) || changeType === CHANGE_TYPE_MISSED);
 };
 
 function respondToSubscriptionValidation(req, res) {
