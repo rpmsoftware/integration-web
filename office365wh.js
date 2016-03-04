@@ -114,7 +114,6 @@ Subscription.prototype.expired = function () {
 
 function Subscriptions(context, path) {
     outlook.EntityFetcher.call(this, context, path);
-    this._Existing = [];
 }
 
 Subscriptions.prototype = Object.create(outlook.EntityFetcher.prototype);
@@ -151,6 +150,25 @@ var normalizeChangeTypes = (function () {
     };
 })();
 
+Subscriptions.prototype.get = function (id) {
+    var request = new outlook.Extensions.Request(this.getPath(id));
+    console.log('Request: %j',request);
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        self.context.request(request).then(function (data) {
+            data = JSON.parse(data);
+            data = new Subscription(self.context, self.getPath(data.Id), data);
+            resolve(data);
+        }, reject);
+    });
+};
+
+Subscriptions.prototype.delete = function (id) {
+    return this.get(id).then(function(subscription) {
+       return subscription.delete();
+    });
+};
+
 Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, clientState) {
     if (resource.context !== this.context) {
         throw new Error('Wrong resource context');
@@ -169,7 +187,6 @@ Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, c
         self.context.request(request).then(function (data) {
             data = JSON.parse(data);
             data = new Subscription(self.context, self.getPath(data.Id), data);
-            self._Existing.push(data);
             resolve(data);
         }, reject);
     });
