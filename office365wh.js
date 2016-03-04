@@ -152,7 +152,6 @@ var normalizeChangeTypes = (function () {
 
 Subscriptions.prototype.get = function (id) {
     var request = new outlook.Extensions.Request(this.getPath(id));
-    console.log('Request: %j',request);
     var self = this;
     return new Promise(function (resolve, reject) {
         self.context.request(request).then(function (data) {
