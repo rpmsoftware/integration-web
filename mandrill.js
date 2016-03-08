@@ -67,7 +67,7 @@ exports.createErrorNotifier = function (config) {
     return function (error, subject) {
         logErrorStack(error);
         if (subject === undefined) {
-            subject = error & error.toString();
+            subject = error && error.toString();
         }
         if (error instanceof Error) {
             error = error.stack;
