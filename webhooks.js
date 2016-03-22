@@ -49,7 +49,7 @@
     exports.createRpmWebHookCallback = createRpmWebHookCallback;
 
     exports.start = function (config, callback) {
-        return lib.startPostServer(config, createRpmWebHookCallback(config.secret, callback));
+        return lib.startPostServer(config, createRpmWebHookCallback(config.signSecret, callback));
     };
 
 
