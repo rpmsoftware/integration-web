@@ -169,14 +169,14 @@ Subscriptions.prototype.delete = function (id) {
 };
 
 Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, clientState) {
-    if (resource.context !== this.context) {
+    if (typeof resource==='object' && resource.context !== this.context) {
         throw new Error('Wrong resource context');
     }
     var request = new outlook.Extensions.Request(this.path);
     request.method = 'POST';
     request.data = JSON.stringify({
         '@odata.type': ODATA_TYPE_PUSH_SUBSCRIPTION,
-        Resource: resource.path,
+        Resource: resource.path || resource,
         NotificationURL: callbackUrl,
         ChangeType: normalizeChangeTypes(changeTypes),
         ClientState: clientState || uuid.v4()
