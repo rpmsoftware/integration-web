@@ -242,7 +242,7 @@ function respondToSubscriptionValidation(req, res) {
         res.send(validationToken);
     }
     return !!validationToken;
-};
+}
 
 exports.createOffice365WebHookCallback = function (callback) {
 

@@ -60,9 +60,11 @@
         this.RequestID = ++WebHooksRequestData.prototype.RequestId;
         this.ObjectType = enumObjectType.Form;
         this.ParentType = enumObjectType.PMTemplate;
-        statusId && (this.StatusID = statusId);
+        if (statusId) {
+            this.StatusID = statusId;
+        }
         validateWebHooksRequest(this);
-    };
+    }
 
     WebHooksRequestData.prototype.RequestId = 0;
     exports.WebHooksRequestData = WebHooksRequestData;
@@ -88,7 +90,7 @@
             obj.ObjectType === enumObjectType.Form &&
             obj.ParentType === enumObjectType.PMTemplate;
     }
-    
+
     exports.isWebHooksRequest = isWebHooksRequest;
 
     function validateWebHooksRequest(obj) {

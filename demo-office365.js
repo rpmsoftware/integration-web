@@ -1,4 +1,3 @@
-var outlook = require("node-outlook").Microsoft.OutlookServices;
 var rpmUtil = require('integration-common/util');
 var office365 = require('./office365');
 

@@ -32,7 +32,7 @@ DataContext.prototype.ajax = function (request) {
         self._originalAjax(request).then(
             function (data) {
                 try {
-                    if(data) {
+                    if (data) {
                         data = JSON.stringify(fixDates(JSON.parse(data)));
                     }
                 } catch (err) {
@@ -50,7 +50,7 @@ function pathFnGetContacts(context, data) {
         return self.getPath(data.Id);
     };
     return Contact.parseContacts(context, pathFn, data.value);
-};
+}
 
 Contacts.prototype.getContacts = function () {
     return new Microsoft.OutlookServices.Extensions.CollectionQuery(this.context, this.path, pathFnGetContacts.bind(this));
@@ -200,13 +200,13 @@ function createOutlookTokenFactory(config) {
     return oauth2.createToken().then(function (token) {
         token = oauth2.accessToken.create(token);
         return function getToken() {
-            return token.expired()
-                ? oauth2.createToken().then(function (newToken) {
+            return token.expired() ?
+                oauth2.createToken().then(function (newToken) {
                     token = oauth2.accessToken.create(newToken);
                     console.log('Updated token: ', token);
                     return token.token.access_token;
-                })
-                : Promise.resolve(token.token.access_token);
+                }) :
+                Promise.resolve(token.token.access_token);
 
         };
     });
@@ -224,9 +224,7 @@ function logMsError(error) {
     if (typeof error.getAllResponseHeaders === 'function') {
         console.error('Error headers:', error.getAllResponseHeaders());
     }
-};
-
-
+}
 
 exports.logMsError = logMsError;
 exports.createOutlookClient = createOutlookClient;

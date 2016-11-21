@@ -33,14 +33,14 @@ function startPostServer(port, path, options, callback) {
     }
     var app = createExpressApp(port, options);
     if (typeof callback === 'object') {
-        for (var path in callback) {
+        for (path in callback) {
             app.post(normalizePath(path), callback[path]);
         }
     } else {
         app.post(normalizePath(path), callback);
     }
     return app.startServer();
-};
+}
 
 function createExpressApp(port, options) {
     if (!options) {
@@ -61,7 +61,7 @@ function createExpressApp(port, options) {
         return srv;
     };
     return app;
-};
+}
 
 exports.startPostServer = startPostServer;
 exports.createExpressApp = createExpressApp;

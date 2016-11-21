@@ -2,7 +2,7 @@ var Mandrill = require('mandrill-api/mandrill').Mandrill;
 var logErrorStack = require('integration-common/util').logErrorStack;
 var util = require('util');
 
-var parseEmail = (function () {
+var parseEmail = (() => {
     var p = /(^\s*(\S.*\S)\s*<\s*([\w\.]+@[\w\.]+)\s*>\s*$)|(^\s*([\w\.]+@[\w\.]+)\s*$)/;
 
     return function (str) {
@@ -18,12 +18,10 @@ var parseEmail = (function () {
 })();
 
 function normalize(emails, typ) {
-    var result = Array.isArray(emails) ? emails.map(function (email) {
-        return parseEmail(email);
-    }) : [parseEmail(emails)];
-    typ && result.forEach(function (email) {
-        email.type = typ;
-    });
+    var result = Array.isArray(emails) ? emails.map(parseEmail) : [parseEmail(emails)];
+    if (typ) {
+        result.forEach(email => email.type = typ);
+    }
     return result;
 }
 
@@ -54,16 +52,18 @@ function createMessageSender(apiKey, fromEmail, toEmails, ccEmails) {
         if (messageBody) {
             message[sendAsHtml ? 'html' : 'text'] = messageBody;
         }
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             send({ message: message }, resolve, reject);
         });
     };
-};
+}
 
 exports.createMessageSender = createMessageSender;
 
-exports.createErrorNotifier = function (config) {
-    var sendMessage = createMessageSender(config);
+exports.createErrorNotifier = function (config, sendMessage) {
+    if (typeof sendMessage !== 'function') {
+        sendMessage = createMessageSender(config);
+    }
     return function (error, subject) {
         logErrorStack(error);
         if (subject === undefined) {

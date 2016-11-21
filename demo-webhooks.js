@@ -10,7 +10,7 @@ var server = webhooks.start(config,
     });
 
 function send(headers, data) {
-    new RESTClient().post(cpath, { headers: headers, data: data }, function (data, response) {
+    new RESTClient().post(cpath, { headers: headers, data: data }, () => {
         server.close();
     });
 }
