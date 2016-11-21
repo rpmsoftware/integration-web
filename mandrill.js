@@ -60,10 +60,8 @@ function createMessageSender(apiKey, fromEmail, toEmails, ccEmails) {
 
 exports.createMessageSender = createMessageSender;
 
-exports.createErrorNotifier = function (config, sendMessage) {
-    if (typeof sendMessage !== 'function') {
-        sendMessage = createMessageSender(config);
-    }
+exports.createErrorNotifier = function (configOrSender) {
+    var sendMessage = typeof configOrSender === 'function' ? configOrSender : createMessageSender(configOrSender);
     return function (error, subject) {
         logErrorStack(error);
         if (subject === undefined) {
