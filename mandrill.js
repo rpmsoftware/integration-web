@@ -52,9 +52,7 @@ function createMessageSender(apiKey, fromEmail, toEmails, ccEmails) {
         if (messageBody) {
             message[sendAsHtml ? 'html' : 'text'] = messageBody;
         }
-        return new Promise((resolve, reject) => {
-            send({ message: message }, resolve, reject);
-        });
+        return new Promise((resolve, reject) => send({ message: message }, resolve, reject));
     };
 }
 
