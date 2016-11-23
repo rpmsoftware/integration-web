@@ -3,6 +3,7 @@
     "version": "0.7.0",
     "private": true,
     "files": [
+        "dependencies.json",
         "config.office365.sample",
         "config.webhooks.sample",
         "demo-office365.js",
