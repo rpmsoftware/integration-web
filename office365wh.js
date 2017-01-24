@@ -3,7 +3,7 @@ var uuid = require('node-uuid');
 var Microsoft = require("node-outlook").Microsoft;
 var outlook = Microsoft.OutlookServices;
 var office365 = require('./office365');
-var util = require('util');
+
 
 var ODATA_TYPE_PUSH_SUBSCRIPTION = "#Microsoft.OutlookServices.PushSubscription";
 
@@ -80,10 +80,10 @@ Object.defineProperty(Subscription.prototype, "aquiredTime", {
 });
 
 Subscription.prototype.update = function () {
-    var _this = this;
-    return new Promise(function (resolve, reject) {
+    var self = this;
+    return new Promise((resolve, reject) => {
 
-        var request = new outlook.Extensions.Request(_this.path);
+        var request = new outlook.Extensions.Request(self.path);
 
         request.method = 'PATCH';
 
@@ -100,9 +100,9 @@ Subscription.prototype.update = function () {
             SubscriptionExpirationDateTime: exp
         };
 
-        _this.context.request(request).then(function (data) {
-            _this._AquiredTime = Date.now();
-            _this._ExpirationTime = exp.getTime();
+        self.context.request(request).then(data => {
+            self._AquiredTime = Date.now();
+            self._ExpirationTime = exp.getTime();
             resolve(data);
         }, reject);
     });
@@ -125,8 +125,8 @@ var CHANGE_TYPE_MISSED = exports.CHANGE_TYPE_MISSED = 'Missed';
 
 var CHANGE_TYPES = {};
 
-var normalizeChangeTypes = (function () {
-    [CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED, CHANGE_TYPE_MISSED].forEach(function (changeType) {
+var normalizeChangeTypes = (() => {
+    [CHANGE_TYPE_CREATED, CHANGE_TYPE_DELETED, CHANGE_TYPE_UPDATED, CHANGE_TYPE_MISSED].forEach((changeType) => {
         CHANGE_TYPES[changeType] = changeType;
         CHANGE_TYPES[changeType.toLowerCase()] = changeType;
     });
@@ -153,23 +153,19 @@ var normalizeChangeTypes = (function () {
 Subscriptions.prototype.get = function (id) {
     var request = new outlook.Extensions.Request(this.getPath(id));
     var self = this;
-    return new Promise(function (resolve, reject) {
-        self.context.request(request).then(function (data) {
-            data = JSON.parse(data);
-            data = new Subscription(self.context, self.getPath(data.Id), data);
-            resolve(data);
-        }, reject);
-    });
+    return new Promise((resolve, reject) => self.context.request(request).then(data => {
+        data = JSON.parse(data);
+        data = new Subscription(self.context, self.getPath(data.Id), data);
+        resolve(data);
+    }, reject));
 };
 
 Subscriptions.prototype.delete = function (id) {
-    return this.get(id).then(function(subscription) {
-       return subscription.delete();
-    });
+    return this.get(id).then(subscription => subscription.delete());
 };
 
 Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, clientState) {
-    if (typeof resource==='object' && resource.context !== this.context) {
+    if (typeof resource === 'object' && resource.context !== this.context) {
         throw new Error('Wrong resource context');
     }
     var request = new outlook.Extensions.Request(this.path);
@@ -182,13 +178,11 @@ Subscriptions.prototype.create = function (resource, callbackUrl, changeTypes, c
         ClientState: clientState || uuid.v4()
     });
     var self = this;
-    return new Promise(function (resolve, reject) {
-        self.context.request(request).then(function (data) {
-            data = JSON.parse(data);
-            data = new Subscription(self.context, self.getPath(data.Id), data);
-            resolve(data);
-        }, reject);
-    });
+    return new Promise((resolve, reject) => self.context.request(request).then(data => {
+        data = JSON.parse(data);
+        data = new Subscription(self.context, self.getPath(data.Id), data);
+        resolve(data);
+    }, reject));
 };
 
 Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {
@@ -202,7 +196,7 @@ Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {
     configurable: true
 });
 
-(function () {
+(() => {
     var parseEntityOriginal = outlook.Entity.parseEntity;
     outlook.Entity.parseEntity = function (context, path, data) {
         return (data && data['@odata.type'] === ODATA_TYPE_PUSH_SUBSCRIPTION) ? new Subscription(context, path, data) : parseEntityOriginal(context, path, data);
@@ -212,11 +206,11 @@ Object.defineProperty(outlook.UserFetcher.prototype, "subscriptions", {
 exports.Subscription = Subscription;
 
 function isResource(object) {
-    return Boolean(object
-        && office365.getODataType(object)
-        && object['@odata.id']
-        && office365.getODataEtag(object)
-        && object.Id);
+    return Boolean(object &&
+        office365.getODataType(object) &&
+        object['@odata.id'] &&
+        office365.getODataEtag(object) &&
+        object.Id);
 }
 
 exports.isResource = isResource;
@@ -225,12 +219,12 @@ var ODATA_TYPE_NOTIFICATION = "#Microsoft.OutlookServices.Notification";
 
 exports.isNotification = function (object) {
     var changeType = CHANGE_TYPES[object.ChangeType];
-    return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION
-        && typeof object.SequenceNumber === 'number'
-        && object.SubscriptionId
-        && object.SubscriptionExpirationDateTime
-        && changeType
-        && (object.Resource && isResource(object.ResourceData)) || changeType === CHANGE_TYPE_MISSED);
+    return Boolean(office365.getODataType(object) === ODATA_TYPE_NOTIFICATION &&
+        typeof object.SequenceNumber === 'number' &&
+        object.SubscriptionId &&
+        object.SubscriptionExpirationDateTime &&
+        changeType &&
+        (object.Resource && isResource(object.ResourceData)) || changeType === CHANGE_TYPE_MISSED);
 };
 
 function respondToSubscriptionValidation(req, res) {

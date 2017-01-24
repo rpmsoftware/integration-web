@@ -14,9 +14,7 @@ function fixDates(data) {
     data.DateTimeCreated = data.CreatedDateTime;
     data.DateTimeLastModified = data.LastModifiedDateTime;
     if (Array.isArray(data.value)) {
-        data.value.forEach(function (value) {
-            fixDates(value);
-        });
+        data.value.forEach(fixDates);
     }
     return data;
 }
@@ -28,20 +26,16 @@ var Contacts = Microsoft.OutlookServices.Contacts;
 DataContext.prototype._originalAjax = DataContext.prototype.ajax;
 DataContext.prototype.ajax = function (request) {
     var self = this;
-    return new Promise(function (resolve, reject) {
-        self._originalAjax(request).then(
-            function (data) {
-                try {
-                    if (data) {
-                        data = JSON.stringify(fixDates(JSON.parse(data)));
-                    }
-                } catch (err) {
-                    console.error('Unexpected ', err, err.stack, data);
-                }
-                resolve(data);
-            },
-            reject);
-    });
+    return new Promise((resolve, reject) => self._originalAjax(request).then(data => {
+        try {
+            if (data) {
+                data = JSON.stringify(fixDates(JSON.parse(data)));
+            }
+        } catch (err) {
+            console.error('Unexpected ', err, err.stack, data);
+        }
+        resolve(data);
+    }, reject));
 };
 
 function pathFnGetContacts(context, data) {
@@ -63,34 +57,29 @@ Contacts.prototype.getContact = function (Id) {
 
 Microsoft.OutlookServices.ContactFetcher.prototype.fetch = function () {
     var self = this;
-    return new Promise(function (resolve, reject) {
-        self.context.readUrl(self.path).then(
-            function (data) {
-                data = JSON.parse(data);
-                resolve(Contact.parseContact(self.context, self.path, data));
-            },
-            reject);
-    });
+    return new Promise((resolve, reject) => self.context.readUrl(self.path).then(data => {
+        data = JSON.parse(data);
+        resolve(Contact.parseContact(self.context, self.path, data));
+    }, reject));
 };
 
 Contact.prototype.update = function () {
     var self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         var request = new Microsoft.OutlookServices.Extensions.Request(self.path);
         request.method = 'PATCH';
         request.data = JSON.stringify(self.getRequestBody());
-        self.context.request(request).then(
-            function (data) {
-                data = JSON.parse(data);
-                resolve(Contact.parseContact(self.context, self.path, data));
-            },
+        self.context.request(request).then(data => {
+            data = JSON.parse(data);
+            resolve(Contact.parseContact(self.context, self.path, data));
+        },
             reject);
     });
 };
 
 Contact.prototype.delete = function () {
     var self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         var request = new Microsoft.OutlookServices.Extensions.Request(self.path);
         request.method = 'DELETE';
         self.context.request(request).then(resolve, reject);
@@ -99,18 +88,17 @@ Contact.prototype.delete = function () {
 
 Contacts.prototype.addContact = function (item) {
     var self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
 
         var request = new Microsoft.OutlookServices.Extensions.Request(self.path);
 
         request.method = 'POST';
         request.data = JSON.stringify(item.getRequestBody());
 
-        self.context.request(request).then(
-            function (data) {
-                data = JSON.parse(data);
-                resolve(Contact.parseContact(self.context, self.getPath(data.Id), data));
-            },
+        self.context.request(request).then(data => {
+            data = JSON.parse(data);
+            resolve(Contact.parseContact(self.context, self.getPath(data.Id), data));
+        },
             reject);
 
     });
@@ -124,7 +112,7 @@ var configDefaults = {
 function Office365Config(configuration) {
 
     var self = this;
-    ['tenantID', 'clientID', 'certThumbprint', 'tokenTTL', 'mailbox'].forEach(function (key) {
+    ['tenantID', 'clientID', 'certThumbprint', 'tokenTTL', 'mailbox'].forEach(key => {
         var value = configuration[key];
         if (value === undefined) {
             value = configDefaults[key];
@@ -167,7 +155,7 @@ function createOAuth2(config) {
     return oauth2;
 }
 
-var createToken = (function () {
+var createToken = (() => {
     var params = {
         grant_type: 'client_credentials',
         resource: resource,
@@ -175,19 +163,17 @@ var createToken = (function () {
     };
     return function () {
         var self = this;
-        return new Promise(function (resolve, reject) {
-            self.client.getToken(params, function (error, result) {
-                if (error) {
-                    console.error('Access Token Error: ', error);
-                    reject(error);
-                } else {
-                    result.expires_in = +result.expires_in - 10;
-                    result.expires_on = +result.expires_on;
-                    result.not_before = +result.not_before;
-                    resolve(result);
-                }
-            });
-        });
+        return new Promise((resolve, reject) => self.client.getToken(params, (error, result) => {
+            if (error) {
+                console.error('Access Token Error: ', error);
+                reject(error);
+            } else {
+                result.expires_in = +result.expires_in - 10;
+                result.expires_on = +result.expires_on;
+                result.not_before = +result.not_before;
+                resolve(result);
+            }
+        }));
     };
 })();
 
@@ -197,11 +183,11 @@ function normalizeConfig(config) {
 
 function createOutlookTokenFactory(config) {
     var oauth2 = createOAuth2(normalizeConfig(config));
-    return oauth2.createToken().then(function (token) {
+    return oauth2.createToken().then(token => {
         token = oauth2.accessToken.create(token);
         return function getToken() {
             return token.expired() ?
-                oauth2.createToken().then(function (newToken) {
+                oauth2.createToken().then(newToken => {
                     token = oauth2.accessToken.create(newToken);
                     console.log('Updated token: ', token);
                     return token.token.access_token;
@@ -213,10 +199,9 @@ function createOutlookTokenFactory(config) {
 }
 
 function createOutlookClient(config) {
-    return createOutlookTokenFactory(config).then(function (getToken) {
-        var client = new outlook.Microsoft.OutlookServices.Client(resource + '/api/v2.0', getToken);
-        return client.users.getUser(config.mailbox);
-    });
+    return createOutlookTokenFactory(config).then(getToken =>
+        new outlook.Microsoft.OutlookServices.Client(resource + '/api/v2.0', getToken).users.getUser(config.mailbox)
+    );
 }
 
 function logMsError(error) {

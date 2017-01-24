@@ -1,5 +1,5 @@
 'use strict';
-(function () {
+(() => {
 
     var util = require('util');
     var lib = require('./lib');
