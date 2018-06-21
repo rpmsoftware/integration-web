@@ -1,6 +1,6 @@
 {
     "name": "integration-web",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "private": true,
     "files": [
         "dependencies.json",
@@ -12,6 +12,6 @@
         "office365.js",
         "office365wh.js",
         "webhooks.js",
-        "mandrill.js"
+        "sendemail/*"
     ]
 }

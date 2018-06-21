@@ -6,6 +6,7 @@
     "simple-oauth2": "^0.2.1",
     "jws": "^3.0.0",
     "node-uuid": "^1.4.3",
-    "integration-common": "https://github.com/rpmsoftware/integration-common.git",
-    "mandrill-api": "^1.0.45"
+    "mandrill-api": "^1.0.45",
+    "@sendgrid/mail": "^6.3.1",
+    "integration-common": "https://github.com/rpmsoftware/integration-common.git"
 }
